@@ -22,18 +22,19 @@ Projet ROS2 inspiré des chapitres 7 a 10 de Programming Robots with ROS, adapte
 # 1) Source ROS2
 source /opt/ros/humble/setup.bash
 
-# 2) Creer le workspace local (hors depot git)
-mkdir -p ~/ros2_ws/src
+# 2) Si pas encore fait: le repo doit être cloné dans ~/ros2_ws/src/
+cd ~/ros2_ws/src
+git clone https://github.com/Yannisloum63/ROS2Project_ROBIN_2026.git
 cd ~/ros2_ws
 
-# 3) Lier ce depot dans le workspace (adapter le chemin si besoin)
-ln -s /workspaces/ROS2Project_ROBIN_2026 ~/ros2_ws/src/ROS2Project_ROBIN_2026
-
-# 4) Build initial
+# 3) Build les paquets ROS2
 colcon build
+
+# 4) Source l'installation
 source install/setup.bash
 
 # 5) Verification CLI
+ros2 pkg list | grep -E "reactive_avoidance|coverage_planner"
 ros2 topic list
 ```
 
