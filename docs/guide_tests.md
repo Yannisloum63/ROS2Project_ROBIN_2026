@@ -55,6 +55,42 @@ ros2 run reactive_avoidance avoidance_node \
     --ros-args -p min_distance:=0.4 -p forward_speed:=0.15 -p rotate_speed:=0.3
 ```
 
+### Validation Express Chapitres 7-8 (a faire en premier)
+
+Objectif : valider concretement la boucle perception -> decision -> action.
+
+```bash
+# T1: simulation minimale
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo empty_world.launch.py
+
+# T2: noeud d'evitement
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch reactive_avoidance avoidance.launch.py
+
+# T3: verification topics
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 topic hz /scan
+ros2 topic hz /cmd_vel
+ros2 topic echo /cmd_vel
+```
+
+Checklist de validation (chapitre valide si tout est OK):
+- [ ] `/scan` publie de maniere reguliere (lidar actif)
+- [ ] `/cmd_vel` publie en continu quand le noeud tourne
+- [ ] En zone degagee: `linear.x > 0` et `angular.z ~ 0`
+- [ ] Proche obstacle: `linear.x = 0` et `angular.z != 0`
+- [ ] Pas d'oscillation critique (robot ne reste pas bloque en tremblement)
+
+Preuves minimales a capturer pour ton rapport:
+- Capture terminal `ros2 topic echo /cmd_vel` (phase avance + phase rotation)
+- Courte video de 20-30 s montrant l'evitement
+- Valeurs de parametres utilises (`min_distance`, `forward_speed`, `rotate_speed`)
+
 ---
 
 ## Test 2 : Cartographie (SLAM)
