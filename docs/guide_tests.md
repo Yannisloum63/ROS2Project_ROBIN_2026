@@ -128,15 +128,94 @@ ros2 launch nav2_bringup bringup_launch.py \
 source ~/ros2_ws/install/setup.bash
 ros2 run coverage_planner coverage_planner_node \
     --ros-args -p cell_size:=0.5 -p coverage_threshold:=50
-
-# Terminal 4: Service pour déclancher la couverture (à coder)
-# Pour l'instant, le nœud reçoit `/map` et génère des goals
 ```
 
-**À modifier** : Le nœud `coverage_planner` doit être amélioré pour :
-- Attendre les retours d'exécution des goals
-- Publier automatiquement le goal suivant
-- Tracker les cellules visitées
+**Comportement actuel** :
+- Le nœud génère des goals de couverture depuis `/map`
+- Le nœud publie les goals séquentiellement sur `/goal_pose`
+- Le nœud suit la progression via `/amcl_pose` et passe au goal suivant quand la tolérance est atteinte
+
+---
+
+## Validation chapitre par chapitre (recommandé)
+
+### Chapitre 7-8 : évitement réactif
+
+Objectif : valider perception lidar -> commande `/cmd_vel` sans Nav2.
+
+```bash
+# T1
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo empty_world.launch.py
+
+# T2
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch reactive_avoidance avoidance.launch.py
+
+# T3
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 topic echo /cmd_vel
+```
+
+Critère de validation : le robot avance en zone libre et pivote devant obstacle.
+
+### Chapitre 9 : cartographie SLAM
+
+Objectif : générer une carte exploitable (`.yaml` + `.pgm`).
+
+```bash
+# T1
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+
+# T2
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch slam_toolbox online_async_launch.py slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml use_sim_time:=true
+
+# T3
+ros2 run turtlebot3_teleop teleop_keyboard
+
+# T4 (fin de mapping)
+ros2 run nav2_map_server map_saver_cli -f $HOME/ros2_ws/maps/my_map
+```
+
+Critère de validation : fichiers `my_map.yaml` et `my_map.pgm` présents.
+
+### Chapitre 10 : navigation Nav2
+
+Objectif : AMCL + Nav2 atteignent des goals sur carte figée.
+
+```bash
+# T1
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+
+# T2
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch nav2_bringup bringup_launch.py \
+    use_sim_time:=true \
+    map:=$HOME/ros2_ws/maps/my_map.yaml \
+    params_file:=$PROJECT_ROOT/config/nav2_params.yaml
+
+# T3
+rviz2
+```
+
+Dans RViz2 : `2D Pose Estimate` avant tout goal.
+
+Critère de validation : la TF `map -> odom` existe et le robot atteint au moins 3 goals.
 
 ---
 

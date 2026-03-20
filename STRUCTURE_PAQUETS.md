@@ -42,7 +42,6 @@ ros2 launch coverage_planner coverage.launch.py
 
 - `config/nav2_params.yaml` : Paramètres Nav2 (à adapter)
 - `config/slam_params.yaml` : Paramètres slam_toolbox
-- `config/gazebo_launch_template.py` : Template pour lancer le simulateur
 
 ## Dossiers de Données
 
