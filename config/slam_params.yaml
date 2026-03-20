@@ -1,39 +1,14 @@
-# SLAM Toolbox configuration for ROS2
-
-solver:
-  plugin: solver_plugins::CeresSolver
-  
-ceres_linear_solver_type: SPARSE_NORMAL_CHOLESKY
-ceres_linear_solver_threads: 4
-ceres_threads: 4
-
-# Loop closure
-loop_search_max_chain_size: 5
-do_loop_closing: true
-loop_match_minimum_chain_size: 10
-loop_match_minimum_response_degreesC: 0.0
-loop_match_minimum_absolute_score: 5.0
-loop_match_minimum_relative_score: 0.4
-loop_match_accepted_variety_penalty: 0.5
-
-# Matcher
-matcher_max_iterations: 20
-
-# Minimum distance to process scans
-minimum_travel_heading_delta: 5.0
-minimum_travel_distance: 0.5
-scan_buffer_size: 30
-scan_buffer_discount: 0.3
-
-# Image display
-display_convert_img: true
-display_raw_internal: true
-
-# Solver iterations per added scan
-solver_iterations: 100
-
-# Correlation score threshold
-correlation_score_threshold: 0.7
-
-# Misc
-use_response_expansion: true
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: true
+    mode: mapping
+    map_frame: map
+    odom_frame: odom
+    base_frame: base_footprint
+    scan_topic: /scan
+    max_laser_range: 10.0
+    minimum_time_interval: 0.5
+    resolution: 0.05
+    transform_publish_period: 0.05
+    map_update_interval: 2.0
+    throttle_scans: 1

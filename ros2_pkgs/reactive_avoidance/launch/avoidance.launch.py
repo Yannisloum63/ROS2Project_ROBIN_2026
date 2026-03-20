@@ -12,6 +12,7 @@ def generate_launch_description():
             executable='avoidance_node',
             name='avoidance_node',
             parameters=[
+                {'use_sim_time': True},
                 {'min_distance': 0.3},
                 {'forward_speed': 0.2},
                 {'rotate_speed': 0.5},

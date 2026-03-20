@@ -1,46 +1,41 @@
-"""
-Nav2 Configuration for TurtleBot3 Burger in simulation.
-"""
+# Minimal project-level Nav2 parameter overrides for simulation.
+# This file is intended to be used with nav2_bringup's bringup_launch.py via:
+# params_file:=/path/to/ROS2Project_ROBIN_2026/config/nav2_params.yaml
 
-import os
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+amcl:
+  ros__parameters:
+    use_sim_time: true
 
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
 
-def generate_launch_description():
-    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
-    
-    # Try to use nav2_params.yaml from config folder if it exists
-    # Otherwise use a basic default
-    config_dir = os.path.join(
-        get_package_share_directory('nav2_bringup'),
-        'params',
-        'nav2_params.yaml'
-    )
-    
-    return LaunchDescription([
-        DeclareLaunchArgument(
-            'map',
-            default_value='',
-            description='Full path to the map file'
-        ),
-        DeclareLaunchArgument(
-            'use_sim_time',
-            default_value='True',
-            description='Use simulation time'
-        ),
-        
-        Node(
-            package='nav2_map_server',
-            executable='map_server',
-            name='map_server',
-            output='screen',
-            parameters=[
-                {'yaml_filename': LaunchConfiguration('map')},
-                {'use_sim_time': LaunchConfiguration('use_sim_time')},
-            ]
-        ),
-    ])
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+
+recoveries_server:
+  ros__parameters:
+    use_sim_time: true
+
+map_server:
+  ros__parameters:
+    use_sim_time: true
+
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: true

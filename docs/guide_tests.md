@@ -6,6 +6,9 @@
 # ROS2 Humble (supposé installé)
 source /opt/ros/humble/setup.bash
 
+# Chemin vers ce dépôt
+export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
+
 # Installer les paquets TurtleBot3, Nav2, SLAM
 sudo apt update
 sudo apt install -y \
@@ -62,7 +65,7 @@ export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 
 # Terminal 2: SLAM Toolbox (online async)
-ros2 launch slam_toolbox online_async_launch.py slam_params_file:=$(pwd)/config/slam_params.yaml use_sim_time:=true
+ros2 launch slam_toolbox online_async_launch.py slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml use_sim_time:=true
 
 # Terminal 3: Teleopération (pour bouger le robot manuellement ou programmer mouveurs)
 ros2 run turtlebot3_teleop teleop_keyboard
@@ -90,7 +93,8 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 # Terminal 2: AMCL Localization + Nav2
 ros2 launch nav2_bringup bringup_launch.py \
     use_sim_time:=true \
-    map:=$HOME/ros2_ws/maps/my_map.yaml
+    map:=$HOME/ros2_ws/maps/my_map.yaml \
+    params_file:=$PROJECT_ROOT/config/nav2_params.yaml
 
 # Terminal 3: RViz avec Nav2
 rviz2 -d $(ros2 pkg prefix nav2_bringup)/share/nav2_bringup/launch/nav2_default_view.rviz
@@ -117,7 +121,8 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 # Terminal 2: Nav2 sur carte existante
 ros2 launch nav2_bringup bringup_launch.py \
     use_sim_time:=true \
-    map:=$HOME/ros2_ws/maps/my_map.yaml
+    map:=$HOME/ros2_ws/maps/my_map.yaml \
+    params_file:=$PROJECT_ROOT/config/nav2_params.yaml
 
 # Terminal 3: Coverage Planner
 source ~/ros2_ws/install/setup.bash
@@ -159,7 +164,7 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 
 # Terminal 2
 source ~/ros2_ws/install/setup.bash
-ros2 launch slam_toolbox online_async_launch.py slam_params_file:=$(pwd)/config/slam_params.yaml use_sim_time:=true
+ros2 launch slam_toolbox online_async_launch.py slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml use_sim_time:=true
 
 # Terminal 3: RViz
 rviz2
@@ -180,7 +185,7 @@ ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 
 # Terminal 2
 source ~/ros2_ws/install/setup.bash
-ros2 launch nav2_bringup bringup_launch.py use_sim_time:=true map:=~/ros2_ws/maps/test_map.yaml
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=true map:=~/ros2_ws/maps/test_map.yaml params_file:=$PROJECT_ROOT/config/nav2_params.yaml
 
 # Terminal 3: RViz + set initial pose, puis cliquer des goals
 rviz2
