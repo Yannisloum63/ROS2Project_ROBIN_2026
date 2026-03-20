@@ -25,13 +25,21 @@ class ReactiveAvoidanceNode(Node):
         
         # Declare parameters
         self.declare_parameter('min_distance', 0.3)
-        self.declare_parameter('forward_speed', 0.2)
-        self.declare_parameter('rotate_speed', 0.5)
+        self.declare_parameter('distance_hysteresis', 0.08)
+        self.declare_parameter('forward_speed', 0.12)
+        self.declare_parameter('rotate_speed', 0.35)
+        self.declare_parameter('control_rate_hz', 10.0)
         
         # Get parameters
         self.min_distance = self.get_parameter('min_distance').value
+        self.distance_hysteresis = self.get_parameter('distance_hysteresis').value
         self.forward_speed = self.get_parameter('forward_speed').value
         self.rotate_speed = self.get_parameter('rotate_speed').value
+        self.control_rate_hz = self.get_parameter('control_rate_hz').value
+
+        # State variables to avoid fast oscillations.
+        self.front_distance = float('inf')
+        self.turning = False
         
         # Create subscribers and publishers
         self.scan_subscriber = self.create_subscription(
@@ -46,6 +54,8 @@ class ReactiveAvoidanceNode(Node):
             '/cmd_vel',
             10
         )
+
+        self.control_timer = self.create_timer(1.0 / self.control_rate_hz, self.control_loop)
         
         self.get_logger().info(f"Reactive avoidance initialized. Min distance: {self.min_distance}m")
 
@@ -70,19 +80,32 @@ class ReactiveAvoidanceNode(Node):
             if not math.isinf(dist) and not math.isnan(dist) and dist > 0:
                 front_distance = min(front_distance, dist)
         
-        # Decision logic
+        self.front_distance = front_distance
+
+    def control_loop(self):
+        """
+        Publish commands at fixed rate with hysteresis to reduce jitter.
+        """
         twist = Twist()
-        
-        if front_distance < self.min_distance:
+
+        enter_turn_dist = self.min_distance
+        exit_turn_dist = self.min_distance + self.distance_hysteresis
+
+        if self.front_distance < enter_turn_dist:
+            self.turning = True
+        elif self.front_distance > exit_turn_dist:
+            self.turning = False
+
+        if self.turning:
             # Obstacle too close: rotate in place
             twist.linear.x = 0.0
             twist.angular.z = self.rotate_speed
-            self.get_logger().debug(f"Obstacle at {front_distance:.2f}m - rotating")
+            self.get_logger().debug(f"Obstacle at {self.front_distance:.2f}m - rotating")
         else:
             # Safe to move forward
             twist.linear.x = self.forward_speed
             twist.angular.z = 0.0
-            self.get_logger().debug(f"Clear path (distance: {front_distance:.2f}m) - moving forward")
+            self.get_logger().debug(f"Clear path (distance: {self.front_distance:.2f}m) - moving forward")
         
         self.cmd_vel_publisher.publish(twist)
 

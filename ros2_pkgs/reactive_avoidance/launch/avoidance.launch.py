@@ -14,8 +14,10 @@ def generate_launch_description():
             parameters=[
                 {'use_sim_time': True},
                 {'min_distance': 0.3},
-                {'forward_speed': 0.2},
-                {'rotate_speed': 0.5},
+                {'distance_hysteresis': 0.08},
+                {'forward_speed': 0.12},
+                {'rotate_speed': 0.35},
+                {'control_rate_hz': 10.0},
             ],
             output='screen',
         ),
