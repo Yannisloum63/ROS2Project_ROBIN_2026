@@ -25,6 +25,8 @@ class ReactiveAvoidanceNode(Node):
         
         # Declare parameters
         self.declare_parameter('min_distance', 0.3)
+        self.declare_parameter('cautious_distance', 0.55)
+        self.declare_parameter('emergency_distance', 0.22)
         self.declare_parameter('distance_hysteresis', 0.08)
         self.declare_parameter('forward_speed', 0.12)
         self.declare_parameter('rotate_speed', 0.35)
@@ -32,6 +34,8 @@ class ReactiveAvoidanceNode(Node):
         
         # Get parameters
         self.min_distance = self.get_parameter('min_distance').value
+        self.cautious_distance = self.get_parameter('cautious_distance').value
+        self.emergency_distance = self.get_parameter('emergency_distance').value
         self.distance_hysteresis = self.get_parameter('distance_hysteresis').value
         self.forward_speed = self.get_parameter('forward_speed').value
         self.rotate_speed = self.get_parameter('rotate_speed').value
@@ -71,7 +75,7 @@ class ReactiveAvoidanceNode(Node):
         front_idx = num_ranges // 2
         
         # Search for nearest obstacle in front (with some angle tolerance)
-        angle_range = num_ranges // 8  # ±22.5 degrees
+        angle_range = num_ranges // 5  # wider front cone for earlier reaction
         start_idx = max(0, front_idx - angle_range)
         end_idx = min(num_ranges, front_idx + angle_range)
         
@@ -96,11 +100,25 @@ class ReactiveAvoidanceNode(Node):
         elif self.front_distance > exit_turn_dist:
             self.turning = False
 
-        if self.turning:
+        if self.front_distance < self.emergency_distance:
+            # Emergency zone: stop translation to avoid hard impacts.
+            twist.linear.x = 0.0
+            twist.angular.z = self.rotate_speed * 0.8
+            self.turning = True
+            self.get_logger().debug(f"Emergency obstacle at {self.front_distance:.2f}m")
+        elif self.turning:
             # Obstacle too close: rotate in place
             twist.linear.x = 0.0
             twist.angular.z = self.rotate_speed
             self.get_logger().debug(f"Obstacle at {self.front_distance:.2f}m - rotating")
+        elif self.front_distance < self.cautious_distance:
+            # Cautious zone: keep moving but reduce speed as obstacle approaches.
+            span = max(1e-3, self.cautious_distance - self.min_distance)
+            ratio = (self.front_distance - self.min_distance) / span
+            ratio = max(0.0, min(1.0, ratio))
+            twist.linear.x = self.forward_speed * (0.25 + 0.75 * ratio)
+            twist.angular.z = 0.0
+            self.get_logger().debug(f"Cautious move at {self.front_distance:.2f}m")
         else:
             # Safe to move forward
             twist.linear.x = self.forward_speed
