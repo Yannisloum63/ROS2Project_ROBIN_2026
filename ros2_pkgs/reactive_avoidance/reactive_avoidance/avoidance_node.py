@@ -24,12 +24,12 @@ class ReactiveAvoidanceNode(Node):
         super().__init__('reactive_avoidance_node')
         
         # Declare parameters
-        self.declare_parameter('min_distance', 0.3)
-        self.declare_parameter('cautious_distance', 0.55)
-        self.declare_parameter('emergency_distance', 0.22)
-        self.declare_parameter('distance_hysteresis', 0.08)
-        self.declare_parameter('forward_speed', 0.12)
-        self.declare_parameter('rotate_speed', 0.35)
+        self.declare_parameter('min_distance', 0.2)
+        self.declare_parameter('cautious_distance', 0.4)
+        self.declare_parameter('emergency_distance', 0.15)
+        self.declare_parameter('distance_hysteresis', 0.12)
+        self.declare_parameter('forward_speed', 0.08)
+        self.declare_parameter('rotate_speed', 0.25)
         self.declare_parameter('control_rate_hz', 10.0)
         
         # Get parameters

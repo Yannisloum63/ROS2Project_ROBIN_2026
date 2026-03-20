@@ -13,9 +13,9 @@ def generate_launch_description():
             name='avoidance_node',
             parameters=[
                 {'use_sim_time': True},
-                {'min_distance': 0.4},
-                {'cautious_distance': 0.55},
-                {'emergency_distance': 0.22},
+                {'min_distance': 0.2},
+                {'cautious_distance': 0.4},
+                {'emergency_distance': 0.15},
                 {'distance_hysteresis': 0.12},
                 {'forward_speed': 0.08},
                 {'rotate_speed': 0.25},
