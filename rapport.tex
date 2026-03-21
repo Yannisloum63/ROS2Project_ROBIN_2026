@@ -6,169 +6,210 @@
 	DAHANI  Wissal \\
 	LOUMOUAMOU Yannis\\
 	MAHMOUDI Zaineb\\
-}
+	\section{Introduction}
+	Ce projet a pour objectif de realiser un robot aspirateur autonome en simulation en s'appuyant sur les chapitres 7 a 10 de \emph{Programming Robots with ROS}. Le cadre pedagogique initial etait ROS1. Nous avons choisi de relever le defi d'une implementation complete en ROS2 Humble.
 
-\day17
-\month03
-\year2026
-% \date{\today}
+	Les objectifs fonctionnels sont:
+	\begin{enumerate}
+		\item Evitement reactif d'obstacles (chapitres 7-8)
+		\item Cartographie SLAM d'un environnement inconnu (chapitre 9)
+		\item Navigation sur carte avec Nav2 (chapitre 10)
+		\item Couverture de zone type aspirateur
+	\end{enumerate}
 
-\begin{document}
+	\section{Contexte et migration ROS1 vers ROS2}
+	Le passage ROS1 vers ROS2 a impose des adaptations techniques importantes:
+	\begin{itemize}
+		\item \texttt{rospy} vers \texttt{rclpy}
+		\item \texttt{catkin} vers \texttt{colcon/ament}
+		\item \texttt{move\_base} vers Nav2
+		\item \texttt{gmapping} vers \texttt{slam\_toolbox}
+	\end{itemize}
 
-\section{Introduction}
-Une introduction assez descriptive.
+	Cette migration a ete un axe fort du projet. Elle permet de garder la logique des chapitres du livre tout en utilisant une stack moderne et maintenue.
 
-\section{Organisation}
-Ce rapport est divisé en 3 parties
-\begin{enumerate}
-  \item Une partie
-  \item Autre partie
-  \item Encore une autre partie
-\end{enumerate}
+	\section{Environnement experimental}
+	\subsection{Materiel et logiciel}
+	\begin{itemize}
+		\item Hote: PC portable sous Windows
+		\item VM: Ubuntu 22.04 (VirtualBox)
+		\item ROS: ROS2 Humble
+		\item Simulation: Gazebo + TurtleBot3 Burger
+	\end{itemize}
 
-\lstloadlanguages{Matlab,Python,bash,C++}
-Je peux ajouter une belle figure comme \ref{fig:figure}
+	\subsection{Paquets utilises}
+	\begin{itemize}
+		\item \texttt{reactive\_avoidance} (developpe)
+		\item \texttt{coverage\_planner} (developpe)
+		\item \texttt{nav2\_bringup}, \texttt{navigation2}
+		\item \texttt{slam\_toolbox}
+	\end{itemize}
 
+	\section{Architecture implementee}
+	\subsection{Noeud reactive\_avoidance}
+	Le noeud lit \texttt{/scan} et publie \texttt{/cmd\_vel}. Une version initiale binaire (avance/rotation) a ete stabilisee avec:
+	\begin{itemize}
+		\item hysteresis sur la distance de decision
+		\item boucle de commande a frequence fixe
+		\item zone prudente + zone urgence pour limiter les impacts
+	\end{itemize}
 
+	\subsection{Noeud coverage\_planner}
+	Le noeud de couverture:
+	\begin{itemize}
+		\item lit \texttt{/map}
+		\item genere une trajectoire de type lawnmower
+		\item publie des objectifs sur \texttt{/goal\_pose}
+		\item suit l'avancement via \texttt{/amcl\_pose}
+	\end{itemize}
 
-La réponse à un code python
-\begin{python}
->>> x=2
->>> x
-\end{python}
-\begin{result}
-2
-\end{result}
+	\subsection{Configuration}
+	Les fichiers de configuration principaux sont:
+	\begin{itemize}
+		\item \texttt{config/slam\_params.yaml}
+		\item \texttt{config/nav2\_params.yaml}
+	\end{itemize}
 
-La réponse à un code MATLAB
-\begin{matlab}
->> x=2
-\end{matlab}
-\begin{result}
-X=
-  2
-\end{result}
+	\section{Methodologie de validation}
+	\subsection{Validation par chapitre}
+	Nous avons adopte une validation incrementalement stricte:
+	\begin{enumerate}
+		\item Chapitres 7-8: evitement reactif sans Nav2
+		\item Chapitre 9: cartographie SLAM + sauvegarde carte
+		\item Chapitre 10: localisation AMCL + navigation Nav2
+		\item Couverture: envoi sequentiel d'objectifs sur carte
+	\end{enumerate}
 
-A C++
-\begin{sourcecode}
-\lstinputlisting{hello.cpp}
-\end{sourcecode}
+	\subsection{Metriques suivies}
+	\begin{itemize}
+		\item Couverture (\%)
+		\item Temps de mission
+		\item Nombre de collisions
+		\item Distance parcourue
+		\item Reexploration
+	\end{itemize}
 
-\subsection{Environnement "Shaded"}\label{sec:SS_ENV1}
+	\section{Etat d'avancement actuel}
+	\subsection{Synthese}
+	\begin{center}
+	\begin{tabular}{p{3.5cm}p{3cm}p{7.2cm}}
+		oprule
+		extbf{Bloc} & \textbf{Etat} & \textbf{Commentaire} \\
+	\midrule
+	Chapitres 7-8 & En cours avancee & Publication \texttt{/cmd\_vel} validee; stabilisation physique en cours sur Gazebo VM \\
+	Chapitre 9 & Pret a executer & Configuration SLAM en place; validation finale a faire avec carte sauvegardee \\
+	Chapitre 10 & En cours & Lancement Nav2 OK, reglages TF/AMCL et procedure d'initial pose en cours de verrouillage \\
+	Couverture & Prototype fonctionnel & Generation et publication sequentielle de goals implementees; depend d'une navigation stable \\
+	\bottomrule
+	\end{tabular}
+	\end{center}
 
-L'environnement "Shaded" permet le surlignage d'un texte ou d'une équation pour la mise en évidence d'un résultat  comme par exemple l'étape finale d'un calcul:
+	\subsection{Preuves deja obtenues}
+	Exemple de sortie de commande observee pendant les tests:
+	\begin{bash}
+	ros2 topic echo /cmd_vel
+	linear:
+		x: 0.2
+	angular:
+		z: 0.0
+	---
+	\end{bash}
 
-\definecolor{shadecolor}{gray}{0.95}
-\begin{shaded}
-	\begin{equation}
-		\label{E_SIGN_RX_BB_FREQ}
-		Y(f) = \sum_{p=0}^{P-1}\frac{1}{a^{(p)}} e^{j\Phi_0^{(p)}}e^{-j2\pi \left(\frac{f-f_d^{(p)}}{a^{(p)}}\right)\tau_0^{(p)}}
-		X\left(\frac{f-f_d^{(p)}}{a^{(p)}}\right).
-	\end{equation}
-\end{shaded}
+	Cette preuve confirme la commande d'avance en zone libre. La preuve complementaire attendue pour valider pleinement les chapitres 7-8 est la commande de rotation proche obstacle (\texttt{linear.x = 0}, \texttt{angular.z != 0}).
 
+	\section{Obstacles rencontres et resolutions}
+	\subsection{Problemes d'environnement ROS2}
+	\begin{itemize}
+		\item \textbf{Symptome:} \texttt{Package not found} pour \texttt{nav2\_bringup} et paquets projet.
+		\item \textbf{Cause:} workspace non source ou dependances non installees.
+		\item \textbf{Resolution:} installation des paquets requis, build \texttt{colcon}, puis \texttt{source /opt/ros/humble/setup.bash} et \texttt{source ~/ros2\_ws/install/setup.bash}.
+	\end{itemize}
 
-\subsection{Environnement "Beamer"}\label{sec:SS_ENV2}
+	\subsection{Problemes de configuration Nav2}
+	\begin{itemize}
+		\item \textbf{Symptome:} \texttt{yaml\_filename is not initialized}, \texttt{No critics defined for FollowPath}.
+		\item \textbf{Cause:} fichier \texttt{nav2\_params.yaml} initial trop minimal.
+		\item \textbf{Resolution:} parametrage complet des plugins et critiques DWB, plus reglages des frames.
+	\end{itemize}
 
-L'environnement "Beamer" permet l'encart d'un  texte ou d'une équation permettant la mise en évidence d'une définition ou du résultat d'un calcul:
+	\subsection{Problemes TF et localisation}
+	\begin{itemize}
+		\item \textbf{Symptome:} \texttt{Invalid frame ID map/odom/base\_link}.
+		\item \textbf{Cause:} incoherence \texttt{base\_link} versus \texttt{base\_footprint} et initialisation AMCL incomplete.
+		\item \textbf{Resolution:} harmonisation des frames dans Nav2 et procedure explicite \texttt{2D Pose Estimate} dans RViz2.
+	\end{itemize}
 
-\subsubsection{Sur 1 colonne}\label{sec:SSS_ENV2}
+	\subsection{Problemes de stabilite physique en simulation}
+	\begin{itemize}
+		\item \textbf{Symptome:} robot qui percute un mur, tombe, et ne se releve pas.
+		\item \textbf{Cause:} vitesses trop agressives et collisions trop violentes en VM.
+		\item \textbf{Resolution:} reduction des vitesses, ajout d'hysteresis et de zones prudente/urgence dans le controle reactif.
+	\end{itemize}
 
-Exemple de définition éditée dans un bloc de style \emph{Beamer} sur une colonne :
+	\section{Discussion}
+	Le choix ROS2 apporte une plus-value pedagogique mais introduit une complexite de mise au point plus elevee qu'en ROS1 (ecosysteme, Nav2, parametrage TF et lifecycle nodes). La virtualisation accentue aussi les instabilites physiques en simulation.
 
+	Malgre ces difficultes, l'architecture du projet est maintenant solide et modulaire. Le travail restant est principalement de la validation experimentale et du tuning.
 
-\subsubsection{Sur 2 colonnes}\label{sec:SSS_ENV3}
+	\section{Plan de travail jusqu'a la version finale}
+	\begin{enumerate}
+		\item Verrouiller la validation chapitres 7-8 (preuve avance + preuve rotation)
+		\item Valider chapitre 9 (carte exploitable sauvegardee)
+		\item Stabiliser chapitre 10 (localisation et navigation sur plusieurs objectifs)
+		\item Lancer la campagne de metriques pour la couverture
+		\item Finaliser les resultats quantitatifs et les figures
+	\end{enumerate}
 
-Exemple de 2 équations éditées dans 2 blocs de style \emph{Beamer} sur 2 colonnes :
+	\newpage
+	\begin{IMTAannexes}
 
-\begin{multicols}{2}
-	
-	\begin{beamerblock}{}
-	\end{beamerblock}
-	
-	\begin{beamerblock}{\centering{Fine Cross-correlation}}
-		\begin{equation}
-		A_f^{(m)} = \sum_{i=0}^{N_c-1}u_k^{(m+i)}u_k^{*(m+i+N_{f\prime})}.
-		\end{equation}
-	\end{beamerblock}
-	
-\end{multicols}
+	\IMTAannexe{Commandes de reference}
 
-\newpage
-\section{Exemples de tableau}\label{sec:S_TAB}
+	\section{Build et source}
+	\begin{bash}
+	source /opt/ros/humble/setup.bash
+	cd ~/ros2_ws
+	colcon build --symlink-install --base-paths src/ROS2Project_ROBIN_2026/ros2_pkgs
+	source ~/ros2_ws/install/setup.bash
+	\end{bash}
 
-Exemple de tableau simple avec légende:
+	\section{Validation chapitres 7-8}
+	\begin{bash}
+	export TURTLEBOT3_MODEL=burger
+	ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+	ros2 launch reactive_avoidance avoidance.launch.py
+	ros2 topic echo /cmd_vel
+	\end{bash}
 
-\newpage
-\section{Exemples de texte}\label{sec:S_TEXT}
+	\section{SLAM (chapitre 9)}
+	\begin{bash}
+	export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
+	ros2 launch slam_toolbox online_async_launch.py \
+		slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml \
+		use_sim_time:=true
+	ros2 run nav2_map_server map_saver_cli -f $HOME/ros2_ws/maps/my_map
+	\end{bash}
 
-Cette section présente différents exemples de texte.
+	\section{Navigation (chapitre 10)}
+	\begin{bash}
+	ros2 launch nav2_bringup bringup_launch.py \
+		use_sim_time:=true \
+		map:=$HOME/ros2_ws/maps/my_map.yaml \
+		params_file:=$PROJECT_ROOT/config/nav2_params.yaml
+	\end{bash}
 
-\subsection{Texte sur 2 colonnes}\label{sec:SS_TEXT1}
+	\IMTAannexe{Journal de mise a jour du rapport}
+	Ce document est volontairement evolutif. A chaque campagne de test, les sections
+	\emph{Etat d'avancement actuel}, \emph{Obstacles rencontres}, \emph{Resultats} et
+	les annexes de commandes seront mises a jour.
 
-Exemple d'un texte édité sur deux colonnes:
+	\begin{itemize}
+		\item Version actuelle: architecture de base finalisee, validation complete en cours
+		\item Prochaine mise a jour prevue: apres validation finale des chapitres 7-8 et 9
+	\end{itemize}
 
-\begin{multicols}{2}
-	Voici un exemple de texte édité sur 2 colonnes dans le modèle de document de rapport de recherche IMT Atlantique. Ce modèle est édité en langage \LaTeX{} adapté à la rédaction de documents scientifiques contenant, notamment, des équations et des figures.
-\end{multicols}
+	\end{IMTAannexes}
 
-\subsection{Note de pied de page}\label{sec:SS_TEXT2}
-
-Exemple de note de pied de page : OFDM\footnote{Orthogonal Frequency Division Multiplexing}.
-
-\subsection{Icônes de paragraphe}\label{sec:SS_TEXT3}
-
-Cette section présente des exemples de mise en valeur d'un message sous la forme d'un bloc de texte signalé par une icône et délimité par une ligne verticale \cite{[URL_LATEX1]}.
-
-\notebox{Exemple d'information: ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information,...}
-
-\tipbox{Exemple de suggestion: ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion,...}
-
-\warningbox{Exemple d'avertissement: ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement,...}
-
-\cautionbox{Exemple de mise en garde: ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde,...}
-
-\importantbox{Exemple de message important: ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important,...}
-
-
-\newpage
-%--------------------------------------- DEBUT DES ANNEXES --------------------------------------
-\newpage
-\begin{IMTAannexes}
-	
-%-------------------------------------------- ANNEXE 1  -----------------------------------------
-	
-\IMTAannexe{Exemple d'annexe}\label{sec:S_ANN_EX}
-
-Un exemple d'annexe.
-\section{Première partie}
-
-
-\subsection{Sous-section}
-\subsection{Sous-section}
-
-\section{Deuxième partie}
-
-\subsection{Sous-section}
-\subsection{Sous-section}
-
-%-------------------------------------------- ANNEXE 2  -----------------------------------------
-
-\IMTAannexe{Autre annexe}\label{sec:S_ANN_EX2}
-
-Un autre exemple d'annexe.
-\section{Première partie}
-
-
-\subsection{Sous-section}
-\subsection{Sous-section}
-
-\section{Deuxième partie}
-
-\subsection{Sous-section}
-\subsection{Sous-section}
-
-%------------------------------------- -- FIN DES ANNEXES --------------------------------------
 \end{IMTAannexes}
 
 %-----------------------------------DEBUT DE LA BIBLIOGRAPHIE ----------------------------------
