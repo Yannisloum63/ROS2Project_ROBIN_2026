@@ -1,224 +1,188 @@
- \documentclass[11pt,a4paper,french]{imta}
+\documentclass[11pt,a4paper,french]{imta}
 
-\title{Rapport : Projet robot aspirateur }
+\title{Rapport : Projet robot aspirateur}
 
 \author{
-	DAHANI  Wissal \\
-	LOUMOUAMOU Yannis\\
-	MAHMOUDI Zaineb\\
-	\section{Introduction}
-	Ce projet a pour objectif de realiser un robot aspirateur autonome en simulation en s'appuyant sur les chapitres 7 a 10 de \emph{Programming Robots with ROS}. Le cadre pedagogique initial etait ROS1. Nous avons choisi de relever le defi d'une implementation complete en ROS2 Humble.
+\tDAHANI Wissal \\
+\tLOUMOUAMOU Yannis\\
+\tMAHMOUDI Zaineb\\
+}
 
-	Les objectifs fonctionnels sont:
-	\begin{enumerate}
-		\item Evitement reactif d'obstacles (chapitres 7-8)
-		\item Cartographie SLAM d'un environnement inconnu (chapitre 9)
-		\item Navigation sur carte avec Nav2 (chapitre 10)
-		\item Couverture de zone type aspirateur
-	\end{enumerate}
+\day17
+\month03
+\year2026
 
-	\section{Contexte et migration ROS1 vers ROS2}
-	Le passage ROS1 vers ROS2 a impose des adaptations techniques importantes:
-	\begin{itemize}
-		\item \texttt{rospy} vers \texttt{rclpy}
-		\item \texttt{catkin} vers \texttt{colcon/ament}
-		\item \texttt{move\_base} vers Nav2
-		\item \texttt{gmapping} vers \texttt{slam\_toolbox}
-	\end{itemize}
+% Mode de compilation robuste (VM / environnements incomplets)
+\setkeys{Gin}{draft}
+\makeatletter
+\renewcommand{\IMTAfrontcover}{}
+\renewcommand{\IMTAcoverpage}{}
+\makeatother
 
-	Cette migration a ete un axe fort du projet. Elle permet de garder la logique des chapitres du livre tout en utilisant une stack moderne et maintenue.
+\begin{document}
 
-	\section{Environnement experimental}
-	\subsection{Materiel et logiciel}
-	\begin{itemize}
-		\item Hote: PC portable sous Windows
-		\item VM: Ubuntu 22.04 (VirtualBox)
-		\item ROS: ROS2 Humble
-		\item Simulation: Gazebo + TurtleBot3 Burger
-	\end{itemize}
+\section{Introduction}
+Ce projet vise a realiser un robot aspirateur autonome en simulation. Le sujet pedagogique de reference est fonde sur des chapitres ROS1 (7 a 10) de \emph{Programming Robots with ROS}. Notre equipe a choisi de relever le defi d'une implementation complete en ROS2 Humble.
 
-	\subsection{Paquets utilises}
-	\begin{itemize}
-		\item \texttt{reactive\_avoidance} (developpe)
-		\item \texttt{coverage\_planner} (developpe)
-		\item \texttt{nav2\_bringup}, \texttt{navigation2}
-		\item \texttt{slam\_toolbox}
-	\end{itemize}
+Objectifs fonctionnels:
+\begin{enumerate}
+  \item Evitement reactif d'obstacles
+  \item Cartographie SLAM d'un environnement inconnu
+  \item Navigation sur carte avec Nav2
+  \item Couverture de zone de type aspirateur
+\end{enumerate}
 
-	\section{Architecture implementee}
-	\subsection{Noeud reactive\_avoidance}
-	Le noeud lit \texttt{/scan} et publie \texttt{/cmd\_vel}. Une version initiale binaire (avance/rotation) a ete stabilisee avec:
-	\begin{itemize}
-		\item hysteresis sur la distance de decision
-		\item boucle de commande a frequence fixe
-		\item zone prudente + zone urgence pour limiter les impacts
-	\end{itemize}
+\section{Contexte de migration ROS1 vers ROS2}
+La migration ROS1 vers ROS2 a implique les changements suivants:
+\begin{itemize}
+  \item \texttt{rospy} vers \texttt{rclpy}
+  \item \texttt{catkin} vers \texttt{ament/colcon}
+  \item \texttt{move\_base} vers Nav2
+  \item \texttt{gmapping} vers \texttt{slam\_toolbox}
+\end{itemize}
 
-	\subsection{Noeud coverage\_planner}
-	Le noeud de couverture:
-	\begin{itemize}
-		\item lit \texttt{/map}
-		\item genere une trajectoire de type lawnmower
-		\item publie des objectifs sur \texttt{/goal\_pose}
-		\item suit l'avancement via \texttt{/amcl\_pose}
-	\end{itemize}
+Cette migration constitue un apport technique majeur du projet: elle preserve la logique des chapitres du livre tout en s'appuyant sur une pile logicielle recente.
 
-	\subsection{Configuration}
-	Les fichiers de configuration principaux sont:
-	\begin{itemize}
-		\item \texttt{config/slam\_params.yaml}
-		\item \texttt{config/nav2\_params.yaml}
-	\end{itemize}
+\section{Environnement experimental}
+\subsection{Plateforme}
+\begin{itemize}
+  \item Hote: Windows
+  \item Virtualisation: VirtualBox
+  \item Systeme invite: Ubuntu 22.04
+  \item ROS: ROS2 Humble
+  \item Simulation: Gazebo + TurtleBot3 Burger
+\end{itemize}
 
-	\section{Methodologie de validation}
-	\subsection{Validation par chapitre}
-	Nous avons adopte une validation incrementalement stricte:
-	\begin{enumerate}
-		\item Chapitres 7-8: evitement reactif sans Nav2
-		\item Chapitre 9: cartographie SLAM + sauvegarde carte
-		\item Chapitre 10: localisation AMCL + navigation Nav2
-		\item Couverture: envoi sequentiel d'objectifs sur carte
-	\end{enumerate}
+\subsection{Paquets utilises}
+\begin{itemize}
+  \item Paquets developpes: \texttt{reactive\_avoidance}, \texttt{coverage\_planner}
+  \item Paquets externes: \texttt{nav2\_bringup}, \texttt{navigation2}, \texttt{slam\_toolbox}
+\end{itemize}
 
-	\subsection{Metriques suivies}
-	\begin{itemize}
-		\item Couverture (\%)
-		\item Temps de mission
-		\item Nombre de collisions
-		\item Distance parcourue
-		\item Reexploration
-	\end{itemize}
+\section{Architecture mise en oeuvre}
+\subsection{Controle reactif (chapitres 7-8)}
+Le noeud \texttt{reactive\_avoidance} lit \texttt{/scan} (LaserScan) et publie \texttt{/cmd\_vel} (Twist).
 
-	\section{Etat d'avancement actuel}
-	\subsection{Synthese}
-	\begin{center}
-	\begin{tabular}{p{3.5cm}p{3cm}p{7.2cm}}
-		oprule
-		extbf{Bloc} & \textbf{Etat} & \textbf{Commentaire} \\
-	\midrule
-	Chapitres 7-8 & En cours avancee & Publication \texttt{/cmd\_vel} validee; stabilisation physique en cours sur Gazebo VM \\
-	Chapitre 9 & Pret a executer & Configuration SLAM en place; validation finale a faire avec carte sauvegardee \\
-	Chapitre 10 & En cours & Lancement Nav2 OK, reglages TF/AMCL et procedure d'initial pose en cours de verrouillage \\
-	Couverture & Prototype fonctionnel & Generation et publication sequentielle de goals implementees; depend d'une navigation stable \\
-	\bottomrule
-	\end{tabular}
-	\end{center}
+Ameliorations apportees pour stabiliser le comportement:
+\begin{itemize}
+  \item Hysteresis sur le seuil de decision obstacle
+  \item Boucle de commande a frequence fixe
+  \item Zone prudente + zone d'urgence pour anticiper les collisions
+  \item Reduction des vitesses par defaut en VM
+\end{itemize}
 
-	\subsection{Preuves deja obtenues}
-	Exemple de sortie de commande observee pendant les tests:
-	\begin{bash}
-	ros2 topic echo /cmd_vel
-	linear:
-		x: 0.2
-	angular:
-		z: 0.0
-	---
-	\end{bash}
+\subsection{Cartographie et navigation (chapitres 9-10)}
+\begin{itemize}
+  \item Cartographie: \texttt{slam\_toolbox} avec sauvegarde \texttt{.yaml/.pgm}
+  \item Navigation: \texttt{nav2\_bringup} avec configuration dediee
+  \item Localisation: AMCL + initialisation de pose dans RViz2
+\end{itemize}
 
-	Cette preuve confirme la commande d'avance en zone libre. La preuve complementaire attendue pour valider pleinement les chapitres 7-8 est la commande de rotation proche obstacle (\texttt{linear.x = 0}, \texttt{angular.z != 0}).
+\subsection{Couverture de zone}
+Le noeud \texttt{coverage\_planner} genere des objectifs de couverture (pattern lawnmower) et les publie sequentiellement sur \texttt{/goal\_pose} en suivant la progression via \texttt{/amcl\_pose}.
 
-	\section{Obstacles rencontres et resolutions}
-	\subsection{Problemes d'environnement ROS2}
-	\begin{itemize}
-		\item \textbf{Symptome:} \texttt{Package not found} pour \texttt{nav2\_bringup} et paquets projet.
-		\item \textbf{Cause:} workspace non source ou dependances non installees.
-		\item \textbf{Resolution:} installation des paquets requis, build \texttt{colcon}, puis \texttt{source /opt/ros/humble/setup.bash} et \texttt{source ~/ros2\_ws/install/setup.bash}.
-	\end{itemize}
+\section{Etat d'avancement actuel}
+\begin{center}
+\begin{tabular}{p{3.6cm}p{2.8cm}p{7.2cm}}
+\toprule
+\textbf{Bloc} & \textbf{Etat} & \textbf{Commentaires} \\
+\midrule
+Chapitres 7-8 & En cours avancee & Publication \texttt{/cmd\_vel} confirmee; stabilite physique en cours d'optimisation en simulation \\
+Chapitre 9 & Pret a valider & Configuration SLAM en place; validation finale via carte sauvegardee \\
+Chapitre 10 & En cours & Nav2 demarre; ajustements TF/AMCL et procedure d'initial pose en cours \\
+Couverture & Prototype fonctionnel & Generation et publication sequentielle d'objectifs implementees \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-	\subsection{Problemes de configuration Nav2}
-	\begin{itemize}
-		\item \textbf{Symptome:} \texttt{yaml\_filename is not initialized}, \texttt{No critics defined for FollowPath}.
-		\item \textbf{Cause:} fichier \texttt{nav2\_params.yaml} initial trop minimal.
-		\item \textbf{Resolution:} parametrage complet des plugins et critiques DWB, plus reglages des frames.
-	\end{itemize}
+\section{Obstacles rencontres et resolutions}
+\subsection{Packages non trouves}
+\textbf{Symptome:} \texttt{Package not found} (\texttt{nav2\_bringup}, \texttt{coverage\_planner}).
 
-	\subsection{Problemes TF et localisation}
-	\begin{itemize}
-		\item \textbf{Symptome:} \texttt{Invalid frame ID map/odom/base\_link}.
-		\item \textbf{Cause:} incoherence \texttt{base\_link} versus \texttt{base\_footprint} et initialisation AMCL incomplete.
-		\item \textbf{Resolution:} harmonisation des frames dans Nav2 et procedure explicite \texttt{2D Pose Estimate} dans RViz2.
-	\end{itemize}
+\textbf{Resolution:} installation des dependances, build \texttt{colcon}, puis double \texttt{source}:
+\begin{bash}
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+\end{bash}
 
-	\subsection{Problemes de stabilite physique en simulation}
-	\begin{itemize}
-		\item \textbf{Symptome:} robot qui percute un mur, tombe, et ne se releve pas.
-		\item \textbf{Cause:} vitesses trop agressives et collisions trop violentes en VM.
-		\item \textbf{Resolution:} reduction des vitesses, ajout d'hysteresis et de zones prudente/urgence dans le controle reactif.
-	\end{itemize}
+\subsection{Parametrage Nav2 incomplet}
+\textbf{Symptome:} erreurs \texttt{yaml\_filename not initialized} et \texttt{No critics defined for FollowPath}.
 
-	\section{Discussion}
-	Le choix ROS2 apporte une plus-value pedagogique mais introduit une complexite de mise au point plus elevee qu'en ROS1 (ecosysteme, Nav2, parametrage TF et lifecycle nodes). La virtualisation accentue aussi les instabilites physiques en simulation.
+\textbf{Resolution:} fichier \texttt{nav2\_params.yaml} complete (plugins, critics DWB, frames coherentes).
 
-	Malgre ces difficultes, l'architecture du projet est maintenant solide et modulaire. Le travail restant est principalement de la validation experimentale et du tuning.
+\subsection{Erreurs TF (map/odom/base\_link)}
+\textbf{Symptome:} \texttt{Invalid frame ID} et timeouts costmaps.
 
-	\section{Plan de travail jusqu'a la version finale}
-	\begin{enumerate}
-		\item Verrouiller la validation chapitres 7-8 (preuve avance + preuve rotation)
-		\item Valider chapitre 9 (carte exploitable sauvegardee)
-		\item Stabiliser chapitre 10 (localisation et navigation sur plusieurs objectifs)
-		\item Lancer la campagne de metriques pour la couverture
-		\item Finaliser les resultats quantitatifs et les figures
-	\end{enumerate}
+\textbf{Resolution:}
+\begin{itemize}
+  \item Harmonisation sur \texttt{base\_footprint}
+  \item Verification des transformations avec \texttt{tf2\_echo}
+  \item Initialisation explicite de pose AMCL dans RViz2
+\end{itemize}
 
-	\newpage
-	\begin{IMTAannexes}
+\subsection{Instabilite physique en simulation}
+\textbf{Symptome:} le robot percute, chute, puis ne se releve pas.
 
-	\IMTAannexe{Commandes de reference}
+\textbf{Resolution:}
+\begin{itemize}
+  \item Vitesse lineaire et angulaire reduites
+  \item Distances de securite augmentees
+  \item Controle reactif adouci (hysteresis + zones prudente/urgence)
+\end{itemize}
 
-	\section{Build et source}
-	\begin{bash}
-	source /opt/ros/humble/setup.bash
-	cd ~/ros2_ws
-	colcon build --symlink-install --base-paths src/ROS2Project_ROBIN_2026/ros2_pkgs
-	source ~/ros2_ws/install/setup.bash
-	\end{bash}
+\section{Plan de validation final}
+\begin{enumerate}
+  \item Valider completement chapitres 7-8 (preuve avance + preuve rotation)
+  \item Valider chapitre 9 (carte exploitable sauvegardee)
+  \item Valider chapitre 10 (3 objectifs atteints sans collision)
+  \item Evaluer la couverture avec metriques quantitatives
+\end{enumerate}
 
-	\section{Validation chapitres 7-8}
-	\begin{bash}
-	export TURTLEBOT3_MODEL=burger
-	ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
-	ros2 launch reactive_avoidance avoidance.launch.py
-	ros2 topic echo /cmd_vel
-	\end{bash}
+\section{Conclusion}
+Le projet a deja atteint une base technique solide sous ROS2, malgre un sujet initialement pense pour ROS1. Les principaux risques restants sont maintenant concentres sur la robustesse experimentale (physique simulation, TF et tuning Nav2). La suite du travail porte surtout sur la validation chiffrable et la consolidation des resultats pour la version finale du rapport.
 
-	\section{SLAM (chapitre 9)}
-	\begin{bash}
-	export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
-	ros2 launch slam_toolbox online_async_launch.py \
-		slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml \
-		use_sim_time:=true
-	ros2 run nav2_map_server map_saver_cli -f $HOME/ros2_ws/maps/my_map
-	\end{bash}
+\newpage
+\begin{IMTAannexes}
 
-	\section{Navigation (chapitre 10)}
-	\begin{bash}
-	ros2 launch nav2_bringup bringup_launch.py \
-		use_sim_time:=true \
-		map:=$HOME/ros2_ws/maps/my_map.yaml \
-		params_file:=$PROJECT_ROOT/config/nav2_params.yaml
-	\end{bash}
+\IMTAannexe{Commandes de reference}
 
-	\IMTAannexe{Journal de mise a jour du rapport}
-	Ce document est volontairement evolutif. A chaque campagne de test, les sections
-	\emph{Etat d'avancement actuel}, \emph{Obstacles rencontres}, \emph{Resultats} et
-	les annexes de commandes seront mises a jour.
+\section{Build et environnement}
+\begin{bash}
+source /opt/ros/humble/setup.bash
+cd ~/ros2_ws
+colcon build --symlink-install --base-paths src/ROS2Project_ROBIN_2026/ros2_pkgs
+source ~/ros2_ws/install/setup.bash
+\end{bash}
 
-	\begin{itemize}
-		\item Version actuelle: architecture de base finalisee, validation complete en cours
-		\item Prochaine mise a jour prevue: apres validation finale des chapitres 7-8 et 9
-	\end{itemize}
+\section{Validation chapitres 7-8}
+\begin{bash}
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+ros2 launch reactive_avoidance avoidance.launch.py
+ros2 topic echo /cmd_vel
+\end{bash}
 
-	\end{IMTAannexes}
+\section{SLAM et navigation}
+\begin{bash}
+export PROJECT_ROOT=$HOME/ros2_ws/src/ROS2Project_ROBIN_2026
+ros2 launch slam_toolbox online_async_launch.py \
+  slam_params_file:=$PROJECT_ROOT/config/slam_params.yaml \
+  use_sim_time:=true
+
+ros2 launch nav2_bringup bringup_launch.py \
+  use_sim_time:=true \
+  map:=$HOME/ros2_ws/maps/my_map.yaml \
+  params_file:=$PROJECT_ROOT/config/nav2_params.yaml
+\end{bash}
+
+\IMTAannexe{Journal de mise a jour}
+Ce rapport est evolutif et sera mis a jour apres chaque campagne de test.
+
+\begin{itemize}
+  \item Version actuelle: architecture stabilisee, validation experimentale en cours
+  \item Prochaine mise a jour: resultats quantitatifs (couverture, temps, collisions)
+\end{itemize}
 
 \end{IMTAannexes}
 
-%-----------------------------------DEBUT DE LA BIBLIOGRAPHIE ----------------------------------
-\newpage
-%------------------ Ajout du renvoi vers la bibliographie dans le sommaire ---------------------
-\phantomsection
-\addcontentsline{toc}{section}{\refname}
-%-----------------------------------------------------------------------------------------------
-
-
 \end{document}
-
