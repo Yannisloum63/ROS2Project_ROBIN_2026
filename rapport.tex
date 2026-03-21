@@ -1,0 +1,183 @@
+ \documentclass[11pt,a4paper,french]{imta}
+
+\title{Rapport : Projet robot aspirateur }
+
+\author{
+	DAHANI  Wissal \\
+	LOUMOUAMOU Yannis\\
+	MAHMOUDI Zaineb\\
+}
+
+\day17
+\month03
+\year2026
+% \date{\today}
+
+\begin{document}
+
+\section{Introduction}
+Une introduction assez descriptive.
+
+\section{Organisation}
+Ce rapport est divisé en 3 parties
+\begin{enumerate}
+  \item Une partie
+  \item Autre partie
+  \item Encore une autre partie
+\end{enumerate}
+
+\lstloadlanguages{Matlab,Python,bash,C++}
+Je peux ajouter une belle figure comme \ref{fig:figure}
+
+
+
+La réponse à un code python
+\begin{python}
+>>> x=2
+>>> x
+\end{python}
+\begin{result}
+2
+\end{result}
+
+La réponse à un code MATLAB
+\begin{matlab}
+>> x=2
+\end{matlab}
+\begin{result}
+X=
+  2
+\end{result}
+
+A C++
+\begin{sourcecode}
+\lstinputlisting{hello.cpp}
+\end{sourcecode}
+
+\subsection{Environnement "Shaded"}\label{sec:SS_ENV1}
+
+L'environnement "Shaded" permet le surlignage d'un texte ou d'une équation pour la mise en évidence d'un résultat  comme par exemple l'étape finale d'un calcul:
+
+\definecolor{shadecolor}{gray}{0.95}
+\begin{shaded}
+	\begin{equation}
+		\label{E_SIGN_RX_BB_FREQ}
+		Y(f) = \sum_{p=0}^{P-1}\frac{1}{a^{(p)}} e^{j\Phi_0^{(p)}}e^{-j2\pi \left(\frac{f-f_d^{(p)}}{a^{(p)}}\right)\tau_0^{(p)}}
+		X\left(\frac{f-f_d^{(p)}}{a^{(p)}}\right).
+	\end{equation}
+\end{shaded}
+
+
+\subsection{Environnement "Beamer"}\label{sec:SS_ENV2}
+
+L'environnement "Beamer" permet l'encart d'un  texte ou d'une équation permettant la mise en évidence d'une définition ou du résultat d'un calcul:
+
+\subsubsection{Sur 1 colonne}\label{sec:SSS_ENV2}
+
+Exemple de définition éditée dans un bloc de style \emph{Beamer} sur une colonne :
+
+
+\subsubsection{Sur 2 colonnes}\label{sec:SSS_ENV3}
+
+Exemple de 2 équations éditées dans 2 blocs de style \emph{Beamer} sur 2 colonnes :
+
+\begin{multicols}{2}
+	
+	\begin{beamerblock}{}
+	\end{beamerblock}
+	
+	\begin{beamerblock}{\centering{Fine Cross-correlation}}
+		\begin{equation}
+		A_f^{(m)} = \sum_{i=0}^{N_c-1}u_k^{(m+i)}u_k^{*(m+i+N_{f\prime})}.
+		\end{equation}
+	\end{beamerblock}
+	
+\end{multicols}
+
+\newpage
+\section{Exemples de tableau}\label{sec:S_TAB}
+
+Exemple de tableau simple avec légende:
+
+\newpage
+\section{Exemples de texte}\label{sec:S_TEXT}
+
+Cette section présente différents exemples de texte.
+
+\subsection{Texte sur 2 colonnes}\label{sec:SS_TEXT1}
+
+Exemple d'un texte édité sur deux colonnes:
+
+\begin{multicols}{2}
+	Voici un exemple de texte édité sur 2 colonnes dans le modèle de document de rapport de recherche IMT Atlantique. Ce modèle est édité en langage \LaTeX{} adapté à la rédaction de documents scientifiques contenant, notamment, des équations et des figures.
+\end{multicols}
+
+\subsection{Note de pied de page}\label{sec:SS_TEXT2}
+
+Exemple de note de pied de page : OFDM\footnote{Orthogonal Frequency Division Multiplexing}.
+
+\subsection{Icônes de paragraphe}\label{sec:SS_TEXT3}
+
+Cette section présente des exemples de mise en valeur d'un message sous la forme d'un bloc de texte signalé par une icône et délimité par une ligne verticale \cite{[URL_LATEX1]}.
+
+\notebox{Exemple d'information: ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information, ceci est un message d'information,...}
+
+\tipbox{Exemple de suggestion: ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion, ceci est un message de suggestion,...}
+
+\warningbox{Exemple d'avertissement: ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement, ceci est un message d'avertissement,...}
+
+\cautionbox{Exemple de mise en garde: ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde, ceci est un message de mise en garde,...}
+
+\importantbox{Exemple de message important: ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important, ceci est un message important,...}
+
+
+\newpage
+%--------------------------------------- DEBUT DES ANNEXES --------------------------------------
+\newpage
+\begin{IMTAannexes}
+	
+%-------------------------------------------- ANNEXE 1  -----------------------------------------
+	
+\IMTAannexe{Exemple d'annexe}\label{sec:S_ANN_EX}
+
+Un exemple d'annexe.
+\section{Première partie}
+
+
+\subsection{Sous-section}
+\subsection{Sous-section}
+
+\section{Deuxième partie}
+
+\subsection{Sous-section}
+\subsection{Sous-section}
+
+%-------------------------------------------- ANNEXE 2  -----------------------------------------
+
+\IMTAannexe{Autre annexe}\label{sec:S_ANN_EX2}
+
+Un autre exemple d'annexe.
+\section{Première partie}
+
+
+\subsection{Sous-section}
+\subsection{Sous-section}
+
+\section{Deuxième partie}
+
+\subsection{Sous-section}
+\subsection{Sous-section}
+
+%------------------------------------- -- FIN DES ANNEXES --------------------------------------
+\end{IMTAannexes}
+
+%-----------------------------------DEBUT DE LA BIBLIOGRAPHIE ----------------------------------
+\newpage
+%------------------ Ajout du renvoi vers la bibliographie dans le sommaire ---------------------
+\phantomsection
+\addcontentsline{toc}{section}{\refname}
+%-----------------------------------------------------------------------------------------------
+
+
+\end{document}
+
