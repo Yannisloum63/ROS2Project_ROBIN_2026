@@ -38,7 +38,7 @@ ros2 pkg list | grep -E "reactive_avoidance|coverage_planner"
 ros2 topic list
 ```
 
-## Paquets utiles a installer
+## Paquets utiles à installer
 
 ```bash
 sudo apt update
@@ -52,7 +52,7 @@ sudo apt install -y \
 	python3-numpy
 ```
 
-## Workflow projet recommande
+## Workflow projet
 
 1. Phase A: verifier simulation + topics (/scan, /odom, /tf, /cmd_vel).
 2. Phase B: coder reactive_avoidance (lecture LaserScan -> publication Twist).
@@ -60,7 +60,7 @@ sudo apt install -y \
 4. Phase D: lancer Nav2 sur carte figee + valider objectifs sans collision.
 5. Phase E: implementer coverage_planner (balayage en grille) + metriques.
 
-## Metriques minimales a reporter
+## Metriques minimales à reporter
 
 - Couverture (%) = (cellules_visitees / cellules_libres) * 100
 - Temps de mission
