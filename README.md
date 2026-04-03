@@ -2,6 +2,8 @@
 
 Projet ROS2 inspiré des chapitres 7 a 10 de Programming Robots with ROS, adapte a un robot aspirateur autonome en simulation.
 
+## Auteurs : Yannis LOUMOUAMOU, Zaineb MAHMOUDI, Wissal DAHANI et Elliot MARTINI 
+
 ## Objectifs du projet
 
 - Evitement d'obstacles autonome (chap. 7-8)
