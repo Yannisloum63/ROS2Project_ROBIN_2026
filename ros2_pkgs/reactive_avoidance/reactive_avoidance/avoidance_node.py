@@ -24,10 +24,10 @@ class ReactiveAvoidanceNode(Node):
         super().__init__('reactive_avoidance_node')
         
         # Declare parameters
-        self.declare_parameter('min_distance', 0.3)
-        self.declare_parameter('distance_hysteresis', 0.08)
-        self.declare_parameter('forward_speed', 0.12)
-        self.declare_parameter('rotate_speed', 0.35)
+        self.declare_parameter('min_distance', 0.5)
+        self.declare_parameter('distance_hysteresis', 0.10)
+        self.declare_parameter('forward_speed', 0.10)
+        self.declare_parameter('rotate_speed', 0.3)
         self.declare_parameter('control_rate_hz', 10.0)
         
         # Get parameters
@@ -61,25 +61,28 @@ class ReactiveAvoidanceNode(Node):
 
     def scan_callback(self, msg: LaserScan):
         """
-        Process LaserScan and decide action.
+        Process LaserScan and extract minimum front distance.
+        TurtleBot3 LDS publishes 360 ranges from 0 to 2*pi:
+          - Index 0   = front (0°)
+          - Index 90  = left  (90°)
+          - Index 180 = back  (180°)
+          - Index 270 = right (270°)
+        Front cone wraps around index 0 (indices 330..359, 0..30 for ±30°).
         """
-        # Get front distance (ignore inf and nan values)
-        front_distance = float('inf')
-        
-        # Calculate front index (straight ahead)
         num_ranges = len(msg.ranges)
-        front_idx = num_ranges // 2
-        
-        # Search for nearest obstacle in front (with some angle tolerance)
-        angle_range = num_ranges // 8  # ±22.5 degrees
-        start_idx = max(0, front_idx - angle_range)
-        end_idx = min(num_ranges, front_idx + angle_range)
-        
-        for i in range(start_idx, end_idx):
-            dist = msg.ranges[i]
-            if not math.isinf(dist) and not math.isnan(dist) and dist > 0:
+        if num_ranges == 0:
+            return
+
+        # ±30° cone around front (index 0), wrap-around safe
+        cone_half = num_ranges // 12
+
+        front_distance = float('inf')
+        for i in range(-cone_half, cone_half + 1):
+            idx = i % num_ranges
+            dist = msg.ranges[idx]
+            if not math.isinf(dist) and not math.isnan(dist) and dist > 0.01:
                 front_distance = min(front_distance, dist)
-        
+
         self.front_distance = front_distance
 
     def control_loop(self):
