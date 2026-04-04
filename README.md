@@ -2,6 +2,8 @@
 
 Projet ROS2 inspiré des chapitres 7 a 10 de Programming Robots with ROS, adapte a un robot aspirateur autonome en simulation.
 
+## Auteurs : Yannis LOUMOUAMOU, Zaineb MAHMOUDI, Wissal DAHANI et Elliot MARTINI 
+
 ## Objectifs du projet
 
 - Evitement d'obstacles autonome (chap. 7-8)
@@ -38,7 +40,7 @@ ros2 pkg list | grep -E "reactive_avoidance|coverage_planner"
 ros2 topic list
 ```
 
-## Paquets utiles a installer
+## Paquets utiles à installer
 
 ```bash
 sudo apt update
@@ -52,7 +54,7 @@ sudo apt install -y \
 	python3-numpy
 ```
 
-## Workflow projet recommande
+## Workflow projet
 
 1. Phase A: verifier simulation + topics (/scan, /odom, /tf, /cmd_vel).
 2. Phase B: coder reactive_avoidance (lecture LaserScan -> publication Twist).
@@ -60,7 +62,7 @@ sudo apt install -y \
 4. Phase D: lancer Nav2 sur carte figee + valider objectifs sans collision.
 5. Phase E: implementer coverage_planner (balayage en grille) + metriques.
 
-## Metriques minimales a reporter
+## Metriques minimales à reporter
 
 - Couverture (%) = (cellules_visitees / cellules_libres) * 100
 - Temps de mission
